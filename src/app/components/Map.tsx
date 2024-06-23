@@ -8,6 +8,7 @@ export default function Map() {
 
   const [distance, setDistance] = useState<string | undefined>();
   const [duration, setDuration] = useState<string | undefined>();
+  const [locationAllowed, setLocationAllowed] = useState<boolean>(false);
 
   useEffect(() => {
     const initMap = async () => {
@@ -24,6 +25,15 @@ export default function Map() {
       const currentPosition = await new Promise<GeolocationPosition>(
         (resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject);
+
+          // Check if the user has allowed location access
+          navigator.permissions
+            .query({ name: "geolocation" })
+            .then((result) => {
+              if (result.state === "granted") {
+                setLocationAllowed(true);
+              }
+            });
         }
       );
 
@@ -114,6 +124,13 @@ export default function Map() {
         <p className="text-black text-xl font-bold">Distance: {distance}</p>
         <p className="text-black text-xl font-bold">Duration: {duration}</p>
       </div>
+
+      {!locationAllowed && (
+        <p className="text-center text-red-500 absolute top-20">
+          Please allow location access to see the distance and duration from
+          your location to the KPU library.
+        </p>
+      )}
     </div>
   );
 }
